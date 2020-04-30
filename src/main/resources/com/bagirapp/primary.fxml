@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<GridPane fx:id="mainGridPane" alignment="CENTER_RIGHT" hgap="5" vgap="5" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.bagirapp.Controller">
+   <padding>
+      <Insets left="30" right="30" />
+   </padding>
+   <Label text="Data Traffic Settings" GridPane.columnIndex="0" GridPane.rowIndex="0">
+      <font>
+         <Font name="Arial bold" size="12" />
+      </font>
+   </Label>
+
+   <Label text="Copy and paste the link of the datas' spreadsheet here: " GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="1" />
+   <TextField fx:id="spreadsheetUrlTextField" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="1" />
+
+   <Label text="Sheet name: " textAlignment="RIGHT" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+   <TextField fx:id="sheetNameTextField" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="2" />
+
+   <Label text="Type the row numbers of the desired Parts (e.g 1-4, 5, 8-23):" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="3" />
+   <TextField fx:id="rowNumbers" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+
+   <Label text="Copy and paste the link of sample GoogleDoc here: " GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="4" />
+   <TextField fx:id="godocUrlTextField" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="4" />
+   <Label text="Date of the documents" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="10" />
+   <DatePicker fx:id="datePicker" GridPane.columnIndex="3" GridPane.rowIndex="10" />
+
+
+   <CheckBox fx:id="uploadImageCheckBox" text="Upload images from computer." GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="5">
+      <GridPane.margin>
+         <Insets left="40.0" />
+      </GridPane.margin></CheckBox>
+<HBox fx:id="uploadImageHBox" spacing="5" visible="false" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="5">
+   <TextField fx:id="uploadImageTextField" prefHeight="25.0" prefWidth="345.0" />
+   <Button fx:id="browseButton" prefWidth="72" text="Browse" textAlignment="CENTER" onAction="#browseImageFolder" />
+</HBox>
+
+   <Label text="Set Google Drive target folder (or url of the folder): " textAlignment="RIGHT" GridPane.columnIndex="0" GridPane.rowIndex="7" />
+   <TextField fx:id="targetFolderTextField" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="7" />
+   <CheckBox fx:id="pdfCheckBox" text="Also create PDF from data" GridPane.columnIndex="0" GridPane.rowIndex="10" />
+
+   <TextArea fx:id="response" wrapText="true" GridPane.columnIndex="0" GridPane.columnSpan="4" GridPane.rowIndex="12" GridPane.rowSpan="10" />
+   <ProgressBar fx:id="progressBar" minWidth="150" GridPane.columnIndex="0" GridPane.columnSpan="4" GridPane.rowIndex="11" />
+
+   <HBox alignment="CENTER_RIGHT" spacing="5" GridPane.columnIndex="3" GridPane.rowIndex="23">
+   <Button fx:id="ok" onAction="#start" prefWidth="72" text="OK" />
+   <Button fx:id="cancel" onAction="#interruptProcess" prefWidth="72" text="Cancel" />
+   </HBox>
+   <columnConstraints>
+      <ColumnConstraints />
+      <ColumnConstraints />
+      <ColumnConstraints />
+      <ColumnConstraints />
+      <ColumnConstraints />
+   </columnConstraints>
+   <rowConstraints>
+      <RowConstraints />
+      <RowConstraints />
+      <RowConstraints />
+      <RowConstraints />
+      <RowConstraints />
+      <RowConstraints />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" />
+      <RowConstraints />
+      <RowConstraints />
+      <RowConstraints />
+      <RowConstraints />
+      <RowConstraints />
+      <RowConstraints />
+      <RowConstraints />
+      <RowConstraints />
+      <RowConstraints />
+      <RowConstraints />
+      <RowConstraints />
+      <RowConstraints />
+      <RowConstraints />
+      <RowConstraints />
+      <RowConstraints />
+      <RowConstraints />
+      <RowConstraints />
+   </rowConstraints>
+
+
+</GridPane>
