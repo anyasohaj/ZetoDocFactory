@@ -121,7 +121,7 @@ public class Controller {
             if (!newFileIds[0].isBlank()) {
                 response.appendText(document.getTitle() + " has been created.\n");
                 String responseCell = newFileIds[GoogleDocument.PDF_ID]; //"https://docs.google.com/document/d/" + newFileIds[GoogleDocument.DOC_ID] + "/export?format=pdf";
-                if (!newFileIds[1].isBlank()) {
+                if (!newFileIds[GoogleDocument.PDF_ID].isBlank()) {
                     try {
                         spreadSheet.addCellValue(responseCell, part.getRowNumberInSpreadSheet());
                         response.appendText("\tPdf link: " + responseCell + "\n\n");

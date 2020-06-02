@@ -75,6 +75,7 @@ public class GoogleDocument {
 
             sendRequests(replaceRequests, createdDocId);
             createDatasheetLinks(scanner.scanForTextElement(DATASHEET.getFieldText()));
+            createDatasheetLinks(scanner.scanForTextElement("Part number:"));
 
             if (!componentsRequest.isEmpty()) {
                 sendRequests(componentsRequest, createdDocId);
@@ -200,10 +201,6 @@ public class GoogleDocument {
         replaceRequests.add(replaceRequest("YYYY-NM-DD", effectiveDate));
     }
 
-    private String getParagraphText(String textPart){
-       return scanner.scanForTextElement(textPart).getTextRun().getContent();
-    }
-
     private List<String> searchForRelatedParagraphs(Fields field){
         List<String> paragraphs = new ArrayList<>();
         String placeholderParagraph = "";
@@ -235,7 +232,7 @@ public class GoogleDocument {
         }
         return relatedParagraphs;
     }
-    
+
 
     private void createDatasheetLinks(ParagraphElement paragraphElement) {
         Range componentRange = new Range().setStartIndex(paragraphElement.getStartIndex()).setEndIndex(paragraphElement.getEndIndex());
@@ -243,16 +240,13 @@ public class GoogleDocument {
             logger.log(Level.FINE, "Datasheet link text has been found");
             componentsRequest.add(createLinkRequest(componentRange, part.getPartData().get(Fields.DATASHEET)));
             componentsRequest.add(removeBulletRequest(componentRange));
-        }
-        if (paragraphElement.getTextRun().getContent().contains("Part number: ")) {
+        }else if (paragraphElement.getTextRun().getContent().contains("Part number: ")) {
             componentsRequest.add(removeBulletRequest(componentRange));
         }
     }
 
-
     private void manageContent(StructuralElement element, String text) {
         Range range = new Range().setStartIndex(element.getStartIndex()).setEndIndex(element.getEndIndex());
-
 
         for (Fields field : Fields.values()) {
             if (!isMatchingPlaceholder(field, text)) {
