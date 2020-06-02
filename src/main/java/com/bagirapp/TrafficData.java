@@ -17,6 +17,7 @@ public class TrafficData {
     private  String imageFolder;
     private LocalDate date;
     private ArrayList<Integer> rows;
+    private boolean replaceImage;
     private boolean isPDFNeeded;
 
     public static final String SHEET_URL = "sheet";
@@ -37,6 +38,7 @@ public class TrafficData {
         this.targetFolderId = getGoogleFolderId(targetFolderInput);
         this.date = LocalDate.now();
         this.rows = new ArrayList<>();
+        this.replaceImage = false;
         this.isPDFNeeded = false;
 
         preferences.addPreferenceChangeListener(new PreferenceChangeListener() {
@@ -210,6 +212,14 @@ public class TrafficData {
 
     public void setPDFNeeded(boolean pdfNeeded) {
         isPDFNeeded = pdfNeeded;
+    }
+
+    public boolean isReplaceImage() {
+        return replaceImage;
+    }
+
+    public void setReplaceImage(boolean replaceImage) {
+        this.replaceImage = replaceImage;
     }
 
     public static Preferences getPreferences() {

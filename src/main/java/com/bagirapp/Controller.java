@@ -92,42 +92,18 @@ public class Controller {
         ok.setDisable(true);
         cancel.setDisable(false);
         //Set data according to the user input
-        trafficData.getPreferences().put(SHEET_URL, spreadsheetUrlTextField.getText());
-        trafficData.getPreferences().put(DOC_URL, godocUrlTextField.getText());
-        trafficData.getPreferences().put(TARGET_FOLDER, targetFolderTextField.getText());
-        trafficData.getPreferences().put(SHEET_NAME, sheetNameTextField.getText());
-        trafficData.getPreferences().put(IMAGE_FOLDER, uploadImageTextField.getText());
+        storeInput();
 
-        trafficData.setSheetHtml(spreadsheetUrlTextField.getText());
-        trafficData.setDocHtml(godocUrlTextField.getText());
-        if (datePicker.getValue() != null) {
-            trafficData.setDate(datePicker.getValue());
-        }
-        trafficData.setSheetName(sheetNameTextField.getText());
-        trafficData.setImageFolder(uploadImageTextField.getText());
-        trafficData.setTargetFolderId(targetFolderTextField.getText());
+      // Creating PDFs from docs
+     /* if (trafficData.isPDFNeeded()) {
+          GoogleDrive drive = new GoogleDrive();
 
-      /* Creating PDFs from docs
-        response.setText("PDF készítő üzemmód...\n");
-        GoogleDrive drive = new GoogleDrive();
-
-        response.appendText("Creating drive connection...\n");
-        Map<String, String> docs = drive.findDocs();
-        response.appendText("Got doc files\n");
-        for (String id : docs.keySet()){
-            System.out.println("Processing docs in for loop");
-            String title = docs.get(id);
-            System.out.println("Working on " + title);
-            drive.createPDF(id, title );
-        }
-        response.appendText("Ready");*/
-
-        String rowResponse = trafficData.setRows(rowNumbers.getText());
-        if (rowResponse != null) {
-            response.appendText(rowResponse);
-            return;
-        }
-        trafficData.setPDFNeeded(pdfCheckBox.isSelected());
+          Map<String, String> docs = drive.findDocs();
+          for (String id : docs.keySet()) {
+              String title = docs.get(id);
+              drive.createPDF(id, title);
+          }
+      }*/
 
         SpreadSheet spreadSheet = new SpreadSheet();
 
@@ -144,10 +120,10 @@ public class Controller {
             String[] newFileIds = document.create();
             if (!newFileIds[0].isBlank()) {
                 response.appendText(document.getTitle() + " has been created.\n");
-                String responseCell = "https://docs.google.com/document/d/" + newFileIds[GoogleDocument.DOC_ID] + "/export?format=pdf";
+                String responseCell = newFileIds[GoogleDocument.PDF_ID]; //"https://docs.google.com/document/d/" + newFileIds[GoogleDocument.DOC_ID] + "/export?format=pdf";
                 if (!newFileIds[1].isBlank()) {
                     try {
-                        spreadSheet.addCellValue(newFileIds[GoogleDocument.PDF_ID], part.getRowNumberInSpreadSheet());
+                        spreadSheet.addCellValue(responseCell, part.getRowNumberInSpreadSheet());
                         response.appendText("\tPdf link: " + responseCell + "\n\n");
                     } catch (IOException e) {
                         response.appendText("NOT managed to save pdf link to Parts master list\n");
@@ -160,6 +136,31 @@ public class Controller {
             }
 
         }
+    }
+
+    private void storeInput() {
+        trafficData.getPreferences().put(SHEET_URL, spreadsheetUrlTextField.getText());
+        trafficData.getPreferences().put(DOC_URL, godocUrlTextField.getText());
+        trafficData.getPreferences().put(TARGET_FOLDER, targetFolderTextField.getText());
+        trafficData.getPreferences().put(SHEET_NAME, sheetNameTextField.getText());
+        trafficData.getPreferences().put(IMAGE_FOLDER, uploadImageTextField.getText());
+
+        trafficData.setSheetHtml(spreadsheetUrlTextField.getText());
+        trafficData.setDocHtml(godocUrlTextField.getText());
+        if (datePicker.getValue() != null) {
+            trafficData.setDate(datePicker.getValue());
+        }
+        trafficData.setSheetName(sheetNameTextField.getText());
+        trafficData.setImageFolder(uploadImageTextField.getText());
+        trafficData.setTargetFolderId(targetFolderTextField.getText());
+
+        String rowResponse = trafficData.setRows(rowNumbers.getText());
+        if (rowResponse != null) {
+            response.appendText(rowResponse);
+            return;
+        }
+        trafficData.setPDFNeeded(pdfCheckBox.isSelected());
+        trafficData.setReplaceImage(uploadImageCheckBox.isSelected());
     }
 
     @FXML
