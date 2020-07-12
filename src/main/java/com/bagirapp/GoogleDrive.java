@@ -46,10 +46,12 @@ public class GoogleDrive {
 
         File copiedFile = new File();
         copiedFile.setName(newTitle);
-        if (!targetFolder.isBlank()){
+        if (!targetFolder.isEmpty()){
             List<String> folder = new ArrayList<>();
             folder.add(targetFolder);
             copiedFile.setParents(folder);
+        }else{
+            System.out.println("target folder is empty");
         }
 
         try {

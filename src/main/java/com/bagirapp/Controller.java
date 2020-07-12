@@ -11,7 +11,6 @@ import javafx.scene.layout.HBox;
 import javafx.stage.DirectoryChooser;
 
 import java.io.File;
-import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
@@ -21,6 +20,8 @@ public class Controller {
     @FXML public GridPane mainGridPane;
     @FXML public TextField spreadsheetUrlTextField;
     @FXML public TextField godocUrlTextField;
+    @FXML public CheckBox automatCheckBox;
+    @FXML public Label rowNumberLabel;
     @FXML public TextField rowNumbers;
     @FXML public TextField sheetNameTextField;
     @FXML public CheckBox uploadImageCheckBox;
@@ -43,6 +44,9 @@ public class Controller {
         pdfCheckBox.setSelected(false);
         datePicker.getEditor().setText(trafficData.getDate().format(DateTimeFormatter.ofPattern("YYYY. MM. dd")));
         spreadsheetUrlTextField.setText(trafficData.getSheetHtml());
+        automatCheckBox.setSelected(true);
+        rowNumbers.setVisible(false);
+        rowNumberLabel.setVisible(false);
         godocUrlTextField.setText(trafficData.getDocHtml());
         targetFolderTextField.setText(trafficData.getTargetFolderId());
         sheetNameTextField.setText(trafficData.getSheetName());
@@ -59,6 +63,19 @@ public class Controller {
                 }else{
                     uploadImageCheckBox.setText("Upload images from computer.");
                     uploadImageHBox.setVisible(false);
+                }
+            }
+        });
+
+        automatCheckBox.addEventHandler(EventType.ROOT, new EventHandler<Event>() {
+            @Override
+            public void handle(Event event) {
+                if (automatCheckBox.isSelected()){
+                    rowNumbers.setVisible(false);
+                    rowNumberLabel.setVisible(false);
+                }else{
+                    rowNumbers.setVisible(true);
+                    rowNumberLabel.setVisible(true);
                 }
             }
         });
@@ -108,10 +125,16 @@ public class Controller {
         SpreadSheet spreadSheet = new SpreadSheet();
 
         GoogleDocument document;
+        if (trafficData.isAutomatGeneration()){
+            System.out.println("AutoGeneration mode");
+            trafficData.setRows(spreadSheet.getOKPartsWithoutDatasheet());
+        }
+
         ArrayList<Part> parts = spreadSheet.getParts();
         if (parts.isEmpty()){
             response.appendText("Not managed to retrieve Part from row(s) " + trafficData.getRows() + "\\n");
         }
+
         for (Part part : parts) {
             if (taskThread.isInterrupted()) {
                 return;
@@ -120,7 +143,7 @@ public class Controller {
             String[] newFileIds = document.create();
             if (!newFileIds[0].isBlank()) {
                 response.appendText(document.getTitle() + " has been created.\n");
-                String responseCell = newFileIds[GoogleDocument.PDF_ID]; //"https://docs.google.com/document/d/" + newFileIds[GoogleDocument.DOC_ID] + "/export?format=pdf";
+                /*String responseCell = newFileIds[GoogleDocument.PDF_ID]; //"https://docs.google.com/document/d/" + newFileIds[GoogleDocument.DOC_ID] + "/export?format=pdf";
                 if (!newFileIds[GoogleDocument.PDF_ID].isBlank()) {
                     try {
                         spreadSheet.addCellValue(responseCell, part.getRowNumberInSpreadSheet());
@@ -130,13 +153,14 @@ public class Controller {
                     }
                 } else {
                     response.appendText("\tPdf has not been created.\n");
-                }
+                }*/
             } else {
                 response.appendText("Can not manage to initialize new document.\n");
             }
 
         }
     }
+
 
     private void storeInput() {
         trafficData.getPreferences().put(SHEET_URL, spreadsheetUrlTextField.getText());
@@ -153,11 +177,14 @@ public class Controller {
         trafficData.setSheetName(sheetNameTextField.getText());
         trafficData.setImageFolder(uploadImageTextField.getText());
         trafficData.setTargetFolderId(targetFolderTextField.getText());
+        trafficData.setAutomatGeneration(automatCheckBox.isSelected());
 
-        String rowResponse = trafficData.setRows(rowNumbers.getText());
-        if (rowResponse != null) {
-            response.appendText(rowResponse);
-            return;
+        if (!trafficData.isAutomatGeneration()) {
+            String rowResponse = trafficData.setRows(rowNumbers.getText());
+            if (rowResponse != null) {
+                response.appendText(rowResponse);
+                return;
+            }
         }
         trafficData.setPDFNeeded(pdfCheckBox.isSelected());
         trafficData.setReplaceImage(uploadImageCheckBox.isSelected());

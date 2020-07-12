@@ -19,6 +19,7 @@ public class TrafficData {
     private ArrayList<Integer> rows;
     private boolean replaceImage;
     private boolean isPDFNeeded;
+    private boolean isAutomatGeneration;
 
     public static final String SHEET_URL = "sheet";
     public static final String DOC_URL = "doc";
@@ -40,6 +41,7 @@ public class TrafficData {
         this.rows = new ArrayList<>();
         this.replaceImage = false;
         this.isPDFNeeded = false;
+        this.isAutomatGeneration = true;
 
         preferences.addPreferenceChangeListener(new PreferenceChangeListener() {
             @Override
@@ -97,6 +99,20 @@ public class TrafficData {
             return html;
         }
 
+    }
+
+    public String setRows(ArrayList<Integer> rows){
+        StringBuilder response = new StringBuilder();
+
+        this.rows.clear();
+        this.rows.addAll(rows);
+
+        response.append("Rows are ");
+        for (int i : rows){
+            response.append(i);
+            response.append(", ");
+        }
+        return response.toString();
     }
 
     public String setRows(String input) {
@@ -212,6 +228,14 @@ public class TrafficData {
 
     public void setPDFNeeded(boolean pdfNeeded) {
         isPDFNeeded = pdfNeeded;
+    }
+
+    public boolean isAutomatGeneration() {
+        return isAutomatGeneration;
+    }
+
+    public void setAutomatGeneration(boolean automatGeneration) {
+        isAutomatGeneration = automatGeneration;
     }
 
     public boolean isReplaceImage() {

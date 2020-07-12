@@ -82,6 +82,7 @@ public class Part {
     }
 
     private void addPartData(Fields key, String[] data){
+
         ArrayList<String> dataList = new ArrayList<>();
         for (int i = 0; i < data.length; i++){
             dataList.add( data[i].trim());
@@ -133,7 +134,7 @@ public class Part {
         String[] component = manuData.split(",");
         manuData = "Manufacturer: " + component[0] + "\n";
         manuData += "\tPart number: " + component[1] + "\n";
-        manuData += "\tDatasheet link";
+        manuData += "\t" + component[2];
         return manuData;
     }
 

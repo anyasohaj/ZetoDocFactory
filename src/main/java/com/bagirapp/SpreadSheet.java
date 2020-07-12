@@ -38,7 +38,7 @@ public class SpreadSheet {
         ArrayList<Part> parts = new ArrayList<>();
         List<String> valueRanges = createValueRanges(trafficData.getRows());
         BatchGetValuesResponse result = getResponse(valueRanges);
-        if (result.isEmpty()){
+        if (result.isEmpty()) {
             logger.log(Level.WARNING, "It returns empty part list, because BatchGetValuesResponse is empty ");
             return parts;
         }
@@ -49,7 +49,7 @@ public class SpreadSheet {
             List<List<Object>> rowArray = result.getValueRanges().get(i).getValues();
             if (rowArray.size() <= 1) {
                 part = retrievePartFromRow(rowArray);
-            }else{
+            } else {
                 logger.log(Level.WARNING, "The rowArray variable is NOT a single row. Returns an empty part.");
             }
             parts.add(part);
@@ -57,10 +57,10 @@ public class SpreadSheet {
         return parts;
     }
 
-    private BatchGetValuesResponse  getResponse(List<String> valueRanges){
+    private BatchGetValuesResponse getResponse(List<String> valueRanges) {
         BatchGetValuesResponse response = new BatchGetValuesResponse();
         try {
-            response =  sheetservice.spreadsheets().values().batchGet(sheetID).setRanges(valueRanges).execute();
+            response = sheetservice.spreadsheets().values().batchGet(sheetID).setRanges(valueRanges).execute();
         } catch (IOException e) {
             logger.log(Level.SEVERE, "Something went wrong with batchGetValuesResponse");
         }
@@ -81,16 +81,17 @@ public class SpreadSheet {
 
             }
         }
-        if (!part.hasDataFor(Fields.TYPE)){
+        if (!part.hasDataFor(Fields.TYPE)) {
             part.addPartData(Fields.TYPE, Part.UNKNOWN);
         }
 
-        if (!part.hasDataFor(Fields.PURPOSE)){
+        if (!part.hasDataFor(Fields.PURPOSE)) {
             part.addPartData(Fields.PURPOSE, withArticle(part.getPartData().get(Fields.NAME)));
         }
 
         return part;
     }
+
 
     private List<String> createValueRanges(ArrayList<Integer> rowNumbers) {
         List<String> ranges = new ArrayList<>();
@@ -102,7 +103,7 @@ public class SpreadSheet {
     }
 
     private void initColumnIndecies() {
-        String titleRow = trafficData.getSheetName() + "!" + "A" + TITLE_ROW + ":Z" + TITLE_ROW;
+        String titleRow = trafficData.getSheetName() + "!" + "A" + TITLE_ROW + ":AD" + TITLE_ROW;
         ValueRange result;
         try {
             result = sheetservice.spreadsheets().values().get(sheetID, titleRow).execute();
@@ -126,12 +127,12 @@ public class SpreadSheet {
             }
             i++;
         }
-        for (Map.Entry index : columnIndecies.entrySet()){
+        for (Map.Entry index : columnIndecies.entrySet()) {
             System.out.println("Key: " + index.getKey() + " value: " + index.getValue());
         }
     }
 
-    private void getColumnIndexOfField(Fields field, String cellValue, int i){
+    private void getColumnIndexOfField(Fields field, String cellValue, int i) {
         if ((cellValue.contains(field.toString()) && !field.equals(Fields.NAME)) || cellValue.equals(field.getUppercaseFieldText())) {
 
             if (field.equals(Fields.INSPECTION)) {
@@ -162,11 +163,55 @@ public class SpreadSheet {
         logger.log(Level.INFO, "{0} cells updated.", result.getUpdatedCells());
     }
 
-    private String withArticle(String text){
-        if ((text.toLowerCase().charAt(0) == 'a') || (text.toLowerCase().charAt(0) == 'e') || (text.toLowerCase().charAt(0) == 'i') || (text.toLowerCase().charAt(0) == 'o') || (text.toLowerCase().charAt(0) == 'u')){
+    private String withArticle(String text) {
+        if ((text.toLowerCase().charAt(0) == 'a') || (text.toLowerCase().charAt(0) == 'e') || (text.toLowerCase().charAt(0) == 'i') || (text.toLowerCase().charAt(0) == 'o') || (text.toLowerCase().charAt(0) == 'u')) {
             return "an " + text;
-        }else{
+        } else {
             return "a " + text;
         }
     }
+
+
+
+    public ArrayList<Integer> getOKPartsWithoutDatasheet() {
+        ArrayList<Integer> rowsForWork = new ArrayList<>();
+        String readyColumnRange = trafficData.getSheetName() + "!" + getColumnName(columnIndecies.get(Fields.DATASHEET)) + (TITLE_ROW + 1) + ":" + getColumnName(columnIndecies.get(Fields.READY)) + "637";
+        System.out.println("ReadyColumnRange: " + readyColumnRange + ", number of ready column: " + columnIndecies.get(Fields.READY));
+        ValueRange result = null;
+        try {
+            result = sheetservice.spreadsheets().values().get(sheetID, readyColumnRange).execute();
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "Something went wrong with getting result from spreadsheet ");
+            e.printStackTrace();
+        }
+        if (result == null && result.isEmpty()) {
+            logger.log(Level.WARNING, "It returns empty part list, because ValueRange is empty ");
+            return rowsForWork;
+        }
+
+        int rowCounter = TITLE_ROW;
+        for (List<Object> row : result.getValues()) {
+            rowCounter++;
+            if (row.size() == 2 && row.get(1).equals("ok") && row.get(0).equals("X")) {
+                    rowsForWork.add(rowCounter);
+                }
+        }
+
+        return rowsForWork;
+    }
+
+    private String getColumnName(int columnIndex) {
+        columnIndex += 65;
+        String columnName = "";
+        if (columnIndex < 65 || columnIndex > 116) {
+            return columnName;
+        }
+
+        if (columnIndex <= 90) {
+            return columnName + (char) columnIndex;
+        } else {
+            return columnName + 'A' + (char) (columnIndex - 26);
+        }
+    }
+
 }

@@ -21,20 +21,25 @@
    <Label text="Sheet name: " textAlignment="RIGHT" GridPane.columnIndex="1" GridPane.rowIndex="2" />
    <TextField fx:id="sheetNameTextField" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="2" />
 
-   <Label text="Type the row numbers of the desired Parts (e.g 1-4, 5, 8-23):" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="3" />
-   <TextField fx:id="rowNumbers" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+   <CheckBox fx:id="automatCheckBox" text="Creating docs automatically" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="4" >
+      <GridPane.margin>
+         <Insets left="40.0" />
+      </GridPane.margin></CheckBox>
 
-   <Label text="Copy and paste the link of sample GoogleDoc here: " GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="4" />
-   <TextField fx:id="godocUrlTextField" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="4" />
+   <Label fx:id="rowNumberLabel" text="Type the row numbers of the desired Parts (e.g 1-4, 5, 8-23):" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="4" />
+   <TextField fx:id="rowNumbers" GridPane.columnIndex="3" GridPane.rowIndex="4" />
+
+   <Label text="Copy and paste the link of sample GoogleDoc here: " GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="5" />
+   <TextField fx:id="godocUrlTextField" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="5" />
    <Label text="Date of the documents" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="10" />
    <DatePicker fx:id="datePicker" GridPane.columnIndex="3" GridPane.rowIndex="10" />
 
 
-   <CheckBox fx:id="uploadImageCheckBox" text="Upload images from computer." GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="5">
+   <CheckBox fx:id="uploadImageCheckBox" text="Upload images from computer." GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="6">
       <GridPane.margin>
          <Insets left="40.0" />
       </GridPane.margin></CheckBox>
-<HBox fx:id="uploadImageHBox" spacing="5" visible="false" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="5">
+<HBox fx:id="uploadImageHBox" spacing="5" visible="false" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="6">
    <TextField fx:id="uploadImageTextField" prefHeight="25.0" prefWidth="345.0" />
    <Button fx:id="browseButton" prefWidth="72" text="Browse" textAlignment="CENTER" onAction="#browseImageFolder" />
 </HBox>

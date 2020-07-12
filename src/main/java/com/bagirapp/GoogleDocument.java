@@ -59,7 +59,7 @@ public class GoogleDocument {
     }
 
     public String[] create() {
-        String[] docIds = {"", ""};
+        String[] docTitles = {"", ""};
 
 
         if (connectToService()) {
@@ -74,23 +74,22 @@ public class GoogleDocument {
             }
 
             sendRequests(replaceRequests, createdDocId);
-            createDatasheetLinks(scanner.scanForTextElement(DATASHEET.getFieldText()));
-            createDatasheetLinks(scanner.scanForTextElement("Part number:"));
+            formatManufacturerData();
 
             if (!componentsRequest.isEmpty()) {
                 sendRequests(componentsRequest, createdDocId);
             }
 
             if (trafficData.isPDFNeeded()) {
-                docIds[PDF_ID] = googleDrive.createPDF(createdDocId, createdDocument.getTitle());
+                docTitles[PDF_ID] = googleDrive.createPDF(createdDocId, createdDocument.getTitle());
                 logger.log(Level.FINE, "Pdf is successfully created.");
             }
         } else {
-            return docIds;
+            return docTitles;
 
         }
-        docIds[DOC_ID] = this.createdDocId;
-        return docIds;
+        docTitles[DOC_ID] = this.createdDocument.getTitle();
+        return docTitles;
     }
 
 
@@ -129,6 +128,8 @@ public class GoogleDocument {
             imageUrl = getImageUrl(imageId);
             logger.log(Level.INFO, "The url of the uploaded image is {0}", imageUrl);
             replaceRequests.add(replaceImageRequest(imageUrl));
+        }else{
+            removeImagePlaceholder();
         }
     }
 
@@ -167,11 +168,12 @@ public class GoogleDocument {
                        // replaceRequests.add(replaceRequest(HANDLING.getPlaceholderText(), ""));
                     }
                 }else if (field.equals(EXTENSION3D)){
-                        indexRelatedRequests.add(0, createLinkRequest(scanner.scanForRange(MODEL.getPlaceholderText()), MODEL.getPlaceholderText()));
+                    System.out.println("EXTENSION3D " + part.getPartData().get(EXTENSION3D));
+                        indexRelatedRequests.add(0, createLinkRequest(scanner.scanForRange(MODEL.getPlaceholderText()), part.getPartData().get(EXTENSION3D)));
                         replaceRequests.add(replaceRequest(MODEL.getPlaceholderText(), DOWNLOAD_LINKTEXT));
                     }else
                     if (field.equals(FIGURE)) {
-                        replaceRequests.add(0, createLinkRequest(scanner.scanForRange(MODEL.getPlaceholderText()), part.getPartData().get(FIGURE)));
+                        replaceRequests.add(0, createLinkRequest(scanner.scanForRange(FIGURE.getPlaceholderText()), "https://sites.google.com/a/zetoinc.com/janos-startpage/elektromos-adatlapok/" + part.getPartData().get(FIGURE) + "?attredirects=0"));
                         replaceRequests.add(replaceRequest(FIGURE.getPlaceholderText(), DOWNLOAD_LINKTEXT));
                     }
 
@@ -189,16 +191,20 @@ public class GoogleDocument {
 
         // handling image placeholder
         if (!trafficData.isReplaceImage()){
-            logger.log(Level.INFO, "Removing image placeholder");
-            StructuralElement imageParagraph = scanner.scanForStructuralElement("Note");
-            Range imageRange = new Range().setStartIndex(imageParagraph.getStartIndex()).setEndIndex(imageParagraph.getEndIndex());
-            indexRelatedRequests.add(  deleteRequest(imageRange));
+            removeImagePlaceholder();
         }else{
             handlePng();
         }
 
         replaceRequests.add(replaceRequest("YYYY-MM-DD", revisedDate));
         replaceRequests.add(replaceRequest("YYYY-NM-DD", effectiveDate));
+    }
+
+    private void removeImagePlaceholder(){
+        logger.log(Level.INFO, "Removing image placeholder");
+        StructuralElement imageParagraph = scanner.scanForStructuralElement("Note");
+        Range imageRange = new Range().setStartIndex(imageParagraph.getStartIndex()).setEndIndex(imageParagraph.getEndIndex());
+        indexRelatedRequests.add(  deleteRequest(imageRange));
     }
 
     private List<String> searchForRelatedParagraphs(Fields field){
@@ -215,7 +221,7 @@ public class GoogleDocument {
             case OPTICAL: paragraphs.add(scanner.scanForTextElement(field.getFieldText()).getTextRun().getContent());
                 break;
             case MECHANICAL: if (!part.getPartData().containsKey(Fields.EXTENSION3D)
-                                    && !part.getPartData().get(Fields.TYPE).equals(Part.MECHANICAL)){
+                                    && !part.getPartData().get(Fields.TYPE).equals(Part.MECHANICAL) && !trafficData.isReplaceImage()){
                                 paragraphs.add(scanner.scanForTextElement(field.getFieldText()).getTextRun().getContent());
                     }
                 break;
@@ -234,67 +240,25 @@ public class GoogleDocument {
     }
 
 
-    private void createDatasheetLinks(ParagraphElement paragraphElement) {
-        Range componentRange = new Range().setStartIndex(paragraphElement.getStartIndex()).setEndIndex(paragraphElement.getEndIndex());
-        if (paragraphElement.getTextRun().getContent().contains("Datasheet link")) {
-            logger.log(Level.FINE, "Datasheet link text has been found");
-            componentsRequest.add(createLinkRequest(componentRange, part.getPartData().get(Fields.DATASHEET)));
-            componentsRequest.add(removeBulletRequest(componentRange));
-        }else if (paragraphElement.getTextRun().getContent().contains("Part number: ")) {
-            componentsRequest.add(removeBulletRequest(componentRange));
+    private void formatManufacturerData() {
+
+        for (int i = 0; i < part.getData(COMPONENTS).size(); i++) {
+            Range linkRange = new Range();
+            ParagraphElement paragraphElement = scanner.scanForTextElement(part.getData(DATASHEET).get(i));
+
+            linkRange.setStartIndex(paragraphElement.getStartIndex()).setEndIndex(paragraphElement.getEndIndex());
+            componentsRequest.add(createLinkRequest(linkRange, part.getData(Fields.DATASHEET).get(i)));
+            componentsRequest.add(removeBulletRequest(linkRange));
+
+            paragraphElement = scanner.scanForTextElement(part.getData(PTNUM).get(i));
+            Range partNumberRange = new Range();
+            partNumberRange.setStartIndex(paragraphElement.getStartIndex()).setEndIndex(paragraphElement.getEndIndex());
+            componentsRequest.add(removeBulletRequest(partNumberRange));
         }
-    }
-
-    private void manageContent(StructuralElement element, String text) {
-        Range range = new Range().setStartIndex(element.getStartIndex()).setEndIndex(element.getEndIndex());
-
-        for (Fields field : Fields.values()) {
-            if (!isMatchingPlaceholder(field, text)) {
-                continue;
-            }
-
-            if (part.hasDataFor(field)) {
-                if (!part.getPartData().get(field).equals(Part.MULTILINE)) {
-                    replacePlaceholderWithSingleData(text, field);
-                } else {
-                    replacePlaceholdersWithMultiLineData(field);
-                }
-            } else {
-                if (text.contains(imagePlaceholder)) {
-                    if (!part.hasDataFor(PICTURE)){
-                    removeImageRequest = deleteRequest(range);
-                    }
-                } else {
-                    replaceRequests.add(replaceRequest(text, ""));
-                }
-            }
+        for (int i = 0; i<part.getData(COMPONENTS).size(); i++){
+            componentsRequest.add(replaceRequest(part.getData(DATASHEET).get(i), "Datasheet link"));
         }
-    }
 
-    //Replace certain areas of the document with constant Strings according to the type of the Part
-
-
-    private void replacePlaceholderWithSingleData(String text, Fields field) {
-        if (text.contains(imagePlaceholder) ) {
-           handlePng();
-        } else  {
-            if (field.equals(Fields.HANDLING)) {
-                if (part.getPartData().get(Fields.HANDLING).contains("ESD")) {
-                    replaceRequests.add(replaceRequest(field.getPlaceholderText(), ESD));
-                } else if (part.getPartData().get(Fields.HANDLING).contains("Fire hazard")) {
-                    replaceRequests.add(replaceRequest(field.getPlaceholderText(), FIRE_HAZARD));
-                } else if (part.getPartData().get(Fields.HANDLING).equals("-".trim())) {
-                    part.getPartData().remove(Fields.HANDLING);
-                    replaceRequests.add(replaceRequest(text, ""));
-                }
-            }
-            if (!(field.equals(Fields.EXTENSION3D) || field.equals(Fields.FIGURE))) {
-                replaceRequests.add(replaceRequest(field.getPlaceholderText(), DOWNLOAD_LINKTEXT));
-            } else {
-                replaceRequests.add(replaceRequest(field.getPlaceholderText(), part.getPartData().get(field)));
-            }
-
-        }
     }
 
     private void replacePlaceholdersWithMultiLineData(Fields field) {
@@ -309,18 +273,6 @@ public class GoogleDocument {
         }
         replaceRequests.add(replaceRequest(field.getPlaceholderText(), data.toString()));
     }
-
-    private boolean isMatchingPlaceholder(Fields field, String text) {
-        return text.contains(field.getPlaceholderText())
-                || (field.equals(Fields.FIGURE) && text.contains(imagePlaceholder))
-                || (field.equals(Fields.OPTICAL) && text.contains(field.getFieldText()))
-                || (field.equals(Fields.MECHANICAL) && text.contains(field.getFieldText()) && !part.getPartData().containsKey(Fields.EXTENSION3D) && !part.getPartData().get(Fields.TYPE).equals(Part.MECHANICAL))
-                || (field.equals(Fields.ELECTRICAL) && text.contains(field.getFieldText())
-                || (field.equals(Fields.EXTENSION3D) && text.contains(Fields.MODEL.getPlaceholderText()))
-                || (field.equals(Fields.COMPONENTS)) && text.contains(field.getFieldText())
-                || (field.equals(Fields.COMPONENTS)) && text.contains(RELATED_TO_ACCEPTED_COMPONENTS_TEXT));
-    }
-
 
     public static Request replaceRequest(String ph, String newValue) {
         return new Request()
@@ -339,6 +291,7 @@ public class GoogleDocument {
     }
 
     public static Request createLinkRequest(Range range, String uri) {
+        System.out.println("CreateLinkrequest was called with uri " + uri);
 
         return new Request()
                 .setUpdateTextStyle(new UpdateTextStyleRequest()

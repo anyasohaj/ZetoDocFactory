@@ -33,7 +33,8 @@ public enum Fields {
     HANDLING("Special handling"),
     TYPE("Part type"),
 
-    MODEL("3D model");
+    MODEL("3D model"),
+    READY("Ready");
 
     private final String fieldText;
     public static String imagePlaceholder = "<" + FIGURE.fieldText.toUpperCase() + ">";
