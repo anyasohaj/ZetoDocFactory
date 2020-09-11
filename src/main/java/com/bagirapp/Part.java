@@ -78,7 +78,9 @@ public class Part {
         if (key.equals(Fields.COMPONENTS) && !data.equals(MULTILINE)){
             data = separateManufaturData(data);
         }
-        this.partData.put(key, data);
+        if (data != "-") {
+            this.partData.put(key, data);
+        }
     }
 
     private void addPartData(Fields key, String[] data){
