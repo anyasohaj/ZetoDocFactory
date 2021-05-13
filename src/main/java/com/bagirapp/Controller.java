@@ -1,5 +1,9 @@
 package com.bagirapp;
 
+import com.bagirapp.nonconfomance.Columns;
+import com.bagirapp.nonconfomance.Item;
+import com.bagirapp.nonconfomance.LogForm;
+import com.bagirapp.nonconfomance.ReportForm;
 import javafx.application.Platform;
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -11,6 +15,7 @@ import javafx.scene.layout.HBox;
 import javafx.stage.DirectoryChooser;
 
 import java.io.File;
+import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
@@ -35,6 +40,7 @@ public class Controller {
     @FXML public ProgressBar progressBar;
     @FXML public Button ok;
     @FXML public Button cancel;
+    @FXML public TextField nonconRows;
 
     private TrafficData trafficData;
     private Thread taskThread;
@@ -208,6 +214,26 @@ public class Controller {
             }
     }
 
+    @FXML public void nonconformanceAction(){
+        ArrayList<Item> itemsToReport;
+        LogForm logForm = new LogForm(nonconRows.getText());
+        itemsToReport = logForm.getItems();
+        GoogleDrive drive = new GoogleDrive();
+
+        for (Item item : itemsToReport){
+                String title = "Nonconformance Report-" + item.getData(Columns.NCID) + "-RECORD-R" + trafficData.getDate() + "-001-DRAFT";
+                com.google.api.services.drive.model.File newSheet = drive.copySample(ReportForm.REPORTFORM_SHEETID, title);
+            System.out.println("NewSheet is ready");
+                String sheetId = newSheet.getId();
+                System.out.println("Our sheetId is " + sheetId);
+            ReportForm reportForm = new ReportForm(item, sheetId);
+            try {
+                reportForm.addCellValue(item.getData(Columns.NAME));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
 }
 

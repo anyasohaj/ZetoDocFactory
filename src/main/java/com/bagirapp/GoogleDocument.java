@@ -25,6 +25,7 @@ public class GoogleDocument {
     private DocScanner scanner;
     private Document createdDocument;
     private String createdDocId;
+    private boolean sameLink;
     public String revisedDate;
     public String effectiveDate;
 
@@ -165,7 +166,7 @@ public class GoogleDocument {
                         replaceRequests.add(replaceRequest(field.getPlaceholderText(), FIRE_HAZARD));
                     } else if (part.getPartData().get(Fields.HANDLING).equals("-".trim())) {
                         part.getPartData().remove(Fields.HANDLING);
-                       // replaceRequests.add(replaceRequest(HANDLING.getPlaceholderText(), ""));
+                        replaceRequests.add(replaceRequest(HANDLING.getPlaceholderText(), ""));
                     }
                 }else if (field.equals(EXTENSION3D)){
                     System.out.println("EXTENSION3D " + part.getPartData().get(EXTENSION3D));
@@ -244,6 +245,7 @@ public class GoogleDocument {
 
         for (int i = 0; i < part.getData(COMPONENTS).size(); i++) {
             Range linkRange = new Range();
+
             ParagraphElement paragraphElement = scanner.scanForTextElement(part.getData(DATASHEET).get(i));
 
             linkRange.setStartIndex(paragraphElement.getStartIndex()).setEndIndex(paragraphElement.getEndIndex());

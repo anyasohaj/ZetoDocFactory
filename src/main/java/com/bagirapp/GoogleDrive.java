@@ -42,6 +42,10 @@ public class GoogleDrive {
     }
 
     public File copySample(String newTitle) {
+        return copySample(sampleDocId, newTitle);
+    }
+
+    public File copySample(String reportFormSample, String newTitle){
         File newFile = new File();
 
         File copiedFile = new File();
@@ -55,9 +59,9 @@ public class GoogleDrive {
         }
 
         try {
-            newFile = service.files().copy( sampleDocId, copiedFile).execute();
+            newFile = service.files().copy( reportFormSample, copiedFile).execute();
         } catch (IOException e) {
-           logger.log(Level.SEVERE, "An error occurred while copying doc file: " + e);
+            logger.log(Level.SEVERE, "An error occurred while copying doc file: " + e);
         }
         logger.log(Level.INFO, "Returning new file with id {0}", newFile.getId());
         return newFile;

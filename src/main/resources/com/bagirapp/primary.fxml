@@ -88,6 +88,8 @@
       <RowConstraints />
       <RowConstraints />
    </rowConstraints>
-
+   <Label text="Row numbers from the NonConformanceLogForm: " GridPane.columnIndex="0" GridPane.rowIndex="24"/>
+   <TextField fx:id="nonconRows" GridPane.columnIndex="1" GridPane.rowIndex="24"/>
+<Button fx:id="noncon" text="NonConformance" onAction="#nonconformanceAction" GridPane.columnIndex="2" GridPane.rowIndex="24"/>
 
 </GridPane>

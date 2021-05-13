@@ -175,7 +175,7 @@ public class SpreadSheet {
 
     public ArrayList<Integer> getOKPartsWithoutDatasheet() {
         ArrayList<Integer> rowsForWork = new ArrayList<>();
-        String readyColumnRange = trafficData.getSheetName() + "!" + getColumnName(columnIndecies.get(Fields.DATASHEET)) + (TITLE_ROW + 1) + ":" + getColumnName(columnIndecies.get(Fields.READY)) + "637";
+        String readyColumnRange = trafficData.getSheetName() + "!" + getColumnName(columnIndecies.get(Fields.DATASHEET)) + (TITLE_ROW + 1) + ":" + getColumnName(columnIndecies.get(Fields.READY)) + "800" ;
         System.out.println("ReadyColumnRange: " + readyColumnRange + ", number of ready column: " + columnIndecies.get(Fields.READY));
         ValueRange result = null;
         try {
